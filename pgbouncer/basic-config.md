@@ -3,15 +3,15 @@ High Availability Architecture (Single-Master with Failover)
 Client  
 │  
 ▼  
-HAProxy (TCP or HTTP load balancing)  
+HAProxy (TCP or HTTP load balancing 192.168.2.1)  
 │  
 ▼  
-PgBouncer (in session / transaction mode)  
+PgBouncer (in session / transaction mode 192.168.2.1)  
 │  
 ▼  
 PostgreSQL:  
-├── Primary node (active)  
-└── Standby node (repmgr - streaming replication)
+├── Primary node (active 192.168.2.2)  
+└── Standby node (repmgr - streaming replication 192.168.2.3)
 ```
 Concepts
 ```
@@ -65,4 +65,35 @@ backend readonly.pgsql
   balance roundrobin                             # Even load balancing
   option tcp-check                               # Enable TCP-level health check
   server standby-db 127.0.0.1:6432 check          # Read-only server (PgBouncer)
+```
+config pgbouncer.ini
+```
+[databases]
+master-db = host=192.168.2.2 port=3455 dbname=bdtest
+standby-db = host=192.168.2.3 port=3455 dbname=bdtest
+
+logfile = /var/log/pgbouncer/pgbouncer.log
+pidfile = /var/run/pgbouncer/pgbouncer.pid
+listen_addr = 0.0.0.0
+listen_port = 6432
+auth_type = md5
+auth_file = /etc/pgbouncer/userlist.txt
+admin_users = postgres,pgbouncer
+stats_users = stats, postgres
+pool_mode = transaction
+server_reset_query = DISCARD ALL
+ignore_startup_parameters = extra_float_digits
+max_client_conn = 520
+default_pool_size = 75
+min_pool_size = 1
+reserve_pool_size = 5
+max_db_connections = 520
+max_user_connections =520
+server_lifetime = 1200
+server_idle_timeout = 600
+server_connect_timeout = 6500
+query_wait_timeout = 7500
+client_login_timeout = 1000
+autodb_idle_timeout = 1200
+pkt_buf = 4096
 ```
