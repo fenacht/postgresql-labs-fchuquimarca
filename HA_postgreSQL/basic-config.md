@@ -1,4 +1,4 @@
-High Availability Architecture (Single-Master with Standby
+High Availability Architecture (Single-Master with Standby)
 
 ```
 Client
